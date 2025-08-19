@@ -53,7 +53,8 @@ class TransactionCategorizer:
                 'electricity', 'eskom', 'city power', 'water', 'municipal', 'rates',
                 'internet', 'fiber', 'adsl', 'telkom', 'mtn', 'vodacom', 'cell c',
                 'rain', 'afrihost', 'webafrica', 'axxess', 'prepaid', 'airtime',
-                'data', 'phone', 'mobile', 'utility', 'council', 'municipality'
+                'data', 'phone', 'mobile', 'utility', 'council', 'municipality',
+                'rent', 'rental', 'lease', 'accommodation', 'housing', 'property'
             ],
             
             'Banking & Fees': [
@@ -108,8 +109,17 @@ class TransactionCategorizer:
             return 'Income & Credits'
         
         # Handle expense transactions (negative amounts)
+        # First, check for high-priority categories (more specific keywords)
+        high_priority_categories = ['Utilities & Bills', 'Groceries & Food', 'Restaurants & Takeaways', 'Transport & Fuel']
+        
+        for category in high_priority_categories:
+            for keyword in self.categories[category]:
+                if keyword in description_lower:
+                    return category
+        
+        # Then check remaining categories
         for category, keywords in self.categories.items():
-            if category in ['Income & Credits']:  # Skip income categories for expenses
+            if category in ['Income & Credits'] or category in high_priority_categories:  # Skip already checked categories
                 continue
                 
             for keyword in keywords:
