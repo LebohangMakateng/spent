@@ -1,0 +1,97 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# User uploaded files (if any)
+uploads/
+temp_files/
+ 
+# Environment files
+.env
+*.env
+*.env.*
+
+# Test and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# Packaging / Python variants
+__pypackages__/
+pip-wheel-metadata/
+.python-version
+
+# General cache
+.cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Windows
+desktop.ini
+
+# Logs dir
+logs/
+
+# Local data (optional; keep sample_data tracked)
+data/
+local_data/
