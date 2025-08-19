@@ -94,13 +94,19 @@ class BankStatementParser:
         """Clean and standardize amount formats."""
         # Convert Amount to numeric, handling various formats
         df['Amount'] = df['Amount'].astype(str)
+        # Handle non-breaking spaces and other whitespace
+        df['Amount'] = df['Amount'].str.replace('\xa0', ' ', regex=False)
         df['Amount'] = df['Amount'].str.replace(',', '')  # Remove commas
         df['Amount'] = df['Amount'].str.replace(' ', '')   # Remove spaces
+        # Handle negative amounts in parentheses
+        df['Amount'] = df['Amount'].str.replace('(', '-', regex=False)
+        df['Amount'] = df['Amount'].str.replace(')', '', regex=False)
         df['Amount'] = pd.to_numeric(df['Amount'], errors='coerce')
         
         # Clean Balance column similarly
         if 'Balance' in df.columns:
             df['Balance'] = df['Balance'].astype(str)
+            df['Balance'] = df['Balance'].str.replace('\xa0', ' ', regex=False)
             df['Balance'] = df['Balance'].str.replace(',', '')
             df['Balance'] = df['Balance'].str.replace(' ', '')
             df['Balance'] = df['Balance'].str.replace('(', '-')  # Handle negative balances in parentheses
@@ -171,7 +177,7 @@ def parse_bank_statement(file_path):
 if __name__ == "__main__":
     # Test with sample data
     try:
-        df, summary = parse_bank_statement("sample_data/real_bank_statement.csv")
+        df, summary = parse_bank_statement("sample_data/sample_bank_statement.csv")
         print("Successfully parsed bank statement!")
         print(f"Summary: {summary}")
         print(f"First 5 transactions:")

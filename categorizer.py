@@ -243,7 +243,7 @@ if __name__ == "__main__":
     from parser import parse_bank_statement
     
     try:
-        df, _ = parse_bank_statement("sample_data/real_bank_statement.csv")
+        df, _ = parse_bank_statement("sample_data/sample_bank_statement.csv")
         categorized_df, summary, insights = categorize_transactions(df)
         
         print("Successfully categorized transactions!")

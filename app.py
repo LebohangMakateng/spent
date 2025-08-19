@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.express as px
 from io import StringIO
 import traceback
+import os
 
 # Import our modules
 from parser import parse_bank_statement, BankStatementParser
@@ -112,6 +113,11 @@ def main():
     )
     
     if uploaded_file is not None:
+        # Enforce max upload size (5 MB)
+        if getattr(uploaded_file, "size", 0) and uploaded_file.size > 5 * 1024 * 1024:
+            st.error("File too large. Please upload a CSV under 5 MB.")
+            return
+
         try:
             # Show processing message
             with st.spinner('🔍 Analyzing your spending patterns...'):
@@ -137,9 +143,10 @@ def main():
             st.error(f"❌ Error processing your bank statement: {str(e)}")
             st.error("Please make sure your CSV file has columns for Date, Description, Amount, and Balance.")
             
-            # Show debug info in expander
-            with st.expander("Debug Information"):
-                st.code(traceback.format_exc())
+            # Show debug info in expander (only in debug mode)
+            if os.getenv("SPENT_DEBUG") == "1":
+                with st.expander("Debug Information"):
+                    st.code(traceback.format_exc())
     
     else:
         # Show sample data and instructions
@@ -324,7 +331,7 @@ def display_instructions():
     if st.button("🎮 Try with Sample Data"):
         try:
             with st.spinner('Loading sample data...'):
-                df, _ = parse_bank_statement("sample_data/real_bank_statement.csv")
+                df, _ = parse_bank_statement("sample_data/sample_bank_statement.csv")
                 categorized_df, _, _ = categorize_transactions(df)
                 visualizations = create_all_visualizations(categorized_df)
             

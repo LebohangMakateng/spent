@@ -318,7 +318,7 @@ if __name__ == "__main__":
     from categorizer import categorize_transactions
     
     try:
-        df, _ = parse_bank_statement("sample_data/real_bank_statement.csv")
+        df, _ = parse_bank_statement("sample_data/sample_bank_statement.csv")
         categorized_df, _, _ = categorize_transactions(df)
         
         visualizations = create_all_visualizations(categorized_df)
