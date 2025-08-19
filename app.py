@@ -17,8 +17,8 @@ from insights import create_all_visualizations
 
 # Page configuration
 st.set_page_config(
-    page_title="Spent - Your Money Detective 💰",
-    page_icon="💰",
+    page_title="Spent - Your Money Detective",
+    page_icon="💼",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -46,10 +46,62 @@ st.markdown("""
     
     .metric-card {
         background: white;
-        padding: 1rem;
-        border-radius: 10px;
+        padding: 0.75rem;
+        border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-align: center;
+        margin: 0.25rem;
+    }
+    
+    .metric-card .stMetric {
+        padding: 0.5rem;
+    }
+    
+    .metric-card .stMetric > div {
+        padding: 0.25rem;
+    }
+    
+    .metric-card .stMetric label {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .metric-card .stMetric [data-testid="metric-container"] {
+        padding: 0.5rem !important;
+    }
+    
+    /* Prevent text truncation in metrics */
+    .stMetric [data-testid="metric-container"] {
+        min-width: 150px !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+    }
+    
+    .stMetric [data-testid="metric-container"] label {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        font-size: 0.85rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    .stMetric [data-testid="metric-container"] [data-testid="metric-value"] {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        font-size: 0.45rem !important;
+        line-height: 1.1 !important;
+        max-width: none !important;
+    }
+    
+    /* Force Streamlit to not truncate text */
+    .stMetric [data-testid="metric-container"] * {
+        text-overflow: unset !important;
+        overflow: visible !important;
+        white-space: normal !important;
     }
     
     .insight-box {
@@ -101,11 +153,11 @@ st.markdown("""
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">Spent - Your Money Detective 💰</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Spent - Your Money Detective</h1>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Upload your bank statement and discover where your money went!</p>', unsafe_allow_html=True)
     
     # File upload section
-    st.markdown("### 📁 Upload Your Bank Statement")
+    st.markdown("### Upload Your Bank Statement")
     uploaded_file = st.file_uploader(
         "Choose a CSV file from your bank",
         type=['csv'],
@@ -120,7 +172,7 @@ def main():
 
         try:
             # Show processing message
-            with st.spinner('🔍 Analyzing your spending patterns...'):
+            with st.spinner('Analyzing your spending patterns...'):
                 # Parse the uploaded file
                 df = parse_uploaded_file(uploaded_file)
                 
@@ -131,7 +183,7 @@ def main():
                 visualizations = create_all_visualizations(categorized_df)
             
             # Success message
-            st.success(f"✅ Successfully analyzed {len(categorized_df)} transactions!")
+            st.success(f"Successfully analyzed {len(categorized_df)} transactions!")
             
             # Display results
             display_money_detective_dashboard(categorized_df, visualizations)
@@ -140,7 +192,7 @@ def main():
             display_download_section(categorized_df)
             
         except Exception as e:
-            st.error(f"❌ Error processing your bank statement: {str(e)}")
+            st.error(f"Error processing your bank statement: {str(e)}")
             st.error("Please make sure your CSV file has columns for Date, Description, Amount, and Balance.")
             
             # Show debug info in expander (only in debug mode)
@@ -176,8 +228,9 @@ def display_money_detective_dashboard(df, visualizations):
     """Display the main money detective dashboard."""
     
     # Summary cards
-    st.markdown("### 💡 Your Money at a Glance")
+    st.markdown("### Your Money at a Glance")
     
+    # Use 4 columns with better spacing to prevent text truncation
     col1, col2, col3, col4 = st.columns(4)
     
     cards = visualizations['summary_cards']
@@ -210,29 +263,32 @@ def display_money_detective_dashboard(df, visualizations):
             help=cards['top_merchant']['subtitle']
         )
     
+    # Add some spacing
+    st.markdown("<br>", unsafe_allow_html=True)
+    
     # Key insights
-    st.markdown("### 🎯 Key Insights")
+    st.markdown("### Key Insights")
     for insight in visualizations['text_insights']:
         st.markdown(f'<div class="insight-box">{insight}</div>', unsafe_allow_html=True)
     
     # Charts section
-    st.markdown("### 📊 Visual Breakdown")
+    st.markdown("### Visual Breakdown")
     
     # Display charts vertically one after another
-    st.markdown("#### 💰 Category Breakdown")
+    st.markdown("#### Category Breakdown")
     st.plotly_chart(visualizations['pie_chart'], use_container_width=True)
     
-    st.markdown("#### 🏪 Top Spending")
+    st.markdown("#### Top Spending")
     st.plotly_chart(visualizations['bar_chart'], use_container_width=True)
     
-    st.markdown("#### 📈 Daily Trends")
+    st.markdown("#### Daily Trends")
     st.plotly_chart(visualizations['line_chart'], use_container_width=True)
     
-    st.markdown("#### 📅 Weekly Pattern")
+    st.markdown("#### Weekly Pattern")
     st.plotly_chart(visualizations['weekly_chart'], use_container_width=True)
     
     # Transaction table
-    with st.expander("📋 View All Categorized Transactions"):
+    with st.expander("View All Categorized Transactions"):
         st.dataframe(
             df[['Date', 'Description', 'Amount', 'Category']].sort_values('Date', ascending=False),
             use_container_width=True
@@ -240,7 +296,7 @@ def display_money_detective_dashboard(df, visualizations):
 
 def display_download_section(df):
     """Display download options for processed data."""
-    st.markdown("### 💾 Download Your Results")
+    st.markdown("### Download Your Results")
     
     col1, col2 = st.columns(2)
     
@@ -248,7 +304,7 @@ def display_download_section(df):
         # Download categorized CSV
         csv_data = df.to_csv(index=False)
         st.download_button(
-            label="📥 Download Categorized Transactions (CSV)",
+            label="Download Categorized Transactions (CSV)",
             data=csv_data,
             file_name="spent_categorized_transactions.csv",
             mime="text/csv",
@@ -259,7 +315,7 @@ def display_download_section(df):
         # Download summary report
         summary_report = generate_summary_report(df)
         st.download_button(
-            label="📊 Download Summary Report (TXT)",
+            label="Download Summary Report (TXT)",
             data=summary_report,
             file_name="spent_summary_report.txt",
             mime="text/plain",
@@ -302,7 +358,7 @@ Daily Average Spending: R{insights_data['summary']['daily_average_spending']:,.2
 
 def display_instructions():
     """Display instructions and sample data info."""
-    st.markdown("### 🚀 How to Get Started")
+    st.markdown("### How to Get Started")
     
     col1, col2 = st.columns(2)
     
@@ -320,22 +376,22 @@ def display_instructions():
         **Step 2: Upload & Analyze**
         1. Click "Choose a CSV file" above
         2. Select your bank statement CSV
-        3. Wait for the magic to happen! ✨
+        3. Wait for the analysis to complete
         4. Discover where your money went
         """)
     
-    st.markdown("### 🏦 Supported Banks")
+    st.markdown("### Supported Banks")
     st.info("Spent works with CSV exports from most South African banks including FNB, ABSA, Standard Bank, Nedbank, and Capitec. The app automatically detects and normalizes different CSV formats.")
     
     # Sample data demo
-    if st.button("🎮 Try with Sample Data"):
+    if st.button("Try with Sample Data"):
         try:
             with st.spinner('Loading sample data...'):
                 df, _ = parse_bank_statement("sample_data/sample_bank_statement.csv")
                 categorized_df, _, _ = categorize_transactions(df)
                 visualizations = create_all_visualizations(categorized_df)
             
-            st.success("✅ Sample data loaded!")
+            st.success("Sample data loaded!")
             display_money_detective_dashboard(categorized_df, visualizations)
             
         except Exception as e:
