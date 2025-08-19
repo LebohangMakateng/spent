@@ -110,7 +110,7 @@ class TransactionCategorizer:
         
         # Handle expense transactions (negative amounts)
         # First, check for high-priority categories (more specific keywords)
-        high_priority_categories = ['Utilities & Bills', 'Groceries & Food', 'Restaurants & Takeaways', 'Transport & Fuel']
+        high_priority_categories = ['Utilities & Bills', 'Groceries & Food', 'Restaurants & Takeaways', 'Transport & Fuel', 'Investments & Savings']
         
         for category in high_priority_categories:
             for keyword in self.categories[category]:
