@@ -70,16 +70,6 @@ Visit `http://localhost:8501` in your browser.
    - Read personalized insights
    - Download categorized data
 
-## 🏦 Supported Banks
-
-Spent works with CSV exports from most South African banks:
-- ✅ FNB (First National Bank)
-- ✅ ABSA
-- ✅ Standard Bank
-- ✅ Nedbank
-- ✅ Capitec
-- ✅ African Bank
-
 The app automatically detects and normalizes different CSV formats.
 
 ## 🔧 Technical Stack
