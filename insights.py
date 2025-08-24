@@ -71,8 +71,8 @@ class MoneyDetectiveInsights:
             'daily_spending': daily_spending.to_dict(),
             'weekly_pattern': weekly_pattern.to_dict(),
             'date_range': {
-                'start': df['Date'].min().strftime('%Y-%m-%d'),
-                'end': df['Date'].max().strftime('%Y-%m-%d')
+                'start': df['Date'].min().strftime('%Y-%m-%d') if pd.notna(df['Date'].min()) else 'Unknown',
+                'end': df['Date'].max().strftime('%Y-%m-%d') if pd.notna(df['Date'].max()) else 'Unknown'
             }
         }
         
@@ -120,13 +120,20 @@ class MoneyDetectiveInsights:
         # Clean up merchant names for display
         merchant_names = [name[:50] + '...' if len(name) > 50 else name for name in top_merchants.index]
         
+        # Create a DataFrame for Plotly
+        chart_data = pd.DataFrame({
+            'Merchant': merchant_names,
+            'Amount': top_merchants.values
+        })
+        
         fig = px.bar(
-            x=top_merchants.values,
-            y=merchant_names,
+            chart_data,
+            x='Amount',
+            y='Merchant',
             orientation='h',
             title=f"Top {top_n} Spending Destinations",
-            labels={'x': 'Amount Spent (R)', 'y': 'Merchant'},
-            color=top_merchants.values,
+            labels={'Amount': 'Amount Spent (R)', 'Merchant': 'Merchant'},
+            color='Amount',
             color_continuous_scale='Reds'
         )
         
@@ -200,12 +207,19 @@ class MoneyDetectiveInsights:
         day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         weekly_spending = expenses.groupby('DayOfWeek')['Amount_Positive'].mean().reindex(day_order, fill_value=0)
         
+        # Create a DataFrame for Plotly
+        chart_data = pd.DataFrame({
+            'Day': day_order,
+            'Amount': weekly_spending.values
+        })
+        
         fig = px.bar(
-            x=day_order,
-            y=weekly_spending.values,
+            chart_data,
+            x='Day',
+            y='Amount',
             title="Average Spending by Day of Week",
-            labels={'x': 'Day of Week', 'y': 'Average Amount (R)'},
-            color=weekly_spending.values,
+            labels={'Day': 'Day of Week', 'Amount': 'Average Amount (R)'},
+            color='Amount',
             color_continuous_scale='Blues'
         )
         

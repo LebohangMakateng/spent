@@ -11,7 +11,7 @@ import traceback
 import os
 
 # Import our modules
-from parser import parse_bank_statement, BankStatementParser
+from parser import parse_bank_statement, parse_pdf_bank_statement, BankStatementParser
 from categorizer import categorize_transactions
 from insights import create_all_visualizations
 
@@ -159,15 +159,18 @@ def main():
     # File upload section
     st.markdown("### Upload Your Bank Statement")
     uploaded_file = st.file_uploader(
-        "Choose a CSV file from your bank",
-        type=['csv'],
-        help="Upload your bank statement in CSV format. Most banks allow you to export statements as CSV files."
+        "Choose a PDF or CSV file from your bank",
+        type=['pdf', 'csv'],
+        help="Upload your bank statement. PDF is the most common format from banks, but CSV is also supported."
     )
     
     if uploaded_file is not None:
-        # Enforce max upload size (5 MB)
-        if getattr(uploaded_file, "size", 0) and uploaded_file.size > 5 * 1024 * 1024:
-            st.error("File too large. Please upload a CSV under 5 MB.")
+        # Enforce max upload size (10 MB for PDFs, 5 MB for CSV)
+        max_size = 10 * 1024 * 1024 if uploaded_file.name.lower().endswith('.pdf') else 5 * 1024 * 1024
+        if getattr(uploaded_file, "size", 0) and uploaded_file.size > max_size:
+            file_type = "PDF" if uploaded_file.name.lower().endswith('.pdf') else "CSV"
+            max_size_mb = 10 if uploaded_file.name.lower().endswith('.pdf') else 5
+            st.error(f"File too large. Please upload a {file_type} under {max_size_mb} MB.")
             return
 
         try:
@@ -193,7 +196,11 @@ def main():
             
         except Exception as e:
             st.error(f"Error processing your bank statement: {str(e)}")
-            st.error("Please make sure your CSV file has columns for Date, Description, Amount, and Balance.")
+            file_type = "PDF" if uploaded_file.name.lower().endswith('.pdf') else "CSV"
+            if file_type == "PDF":
+                st.error("Please make sure your PDF contains a transaction table with Date, Description, Amount, and Balance columns.")
+            else:
+                st.error("Please make sure your CSV file has columns for Date, Description, Amount, and Balance.")
             
             # Show debug info in expander (only in debug mode)
             if os.getenv("SPENT_DEBUG") == "1":
@@ -205,22 +212,33 @@ def main():
         display_instructions()
 
 def parse_uploaded_file(uploaded_file):
-    """Parse the uploaded CSV file."""
-    # Read the file content
-    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+    """Parse the uploaded PDF or CSV file."""
+    file_name = uploaded_file.name.lower()
     
-    # Create a temporary file-like object for our parser
-    parser = BankStatementParser()
+    if file_name.endswith('.pdf'):
+        # Parse PDF file using the new PDF-to-CSV conversion approach
+        cleaned_df, _ = parse_pdf_bank_statement(uploaded_file)
+        
+    elif file_name.endswith('.csv'):
+        # Parse CSV file (existing logic)
+        # Read the file content
+        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+        
+        # Create a temporary file-like object for our parser
+        parser = BankStatementParser()
+        
+        # Load CSV from string
+        try:
+            df = pd.read_csv(stringio, encoding='utf-8')
+        except UnicodeDecodeError:
+            stringio.seek(0)
+            df = pd.read_csv(stringio, encoding='utf-8-sig')
+        
+        # Clean and normalize
+        cleaned_df = parser.clean_and_normalize(df)
     
-    # Load CSV from string
-    try:
-        df = pd.read_csv(stringio, encoding='utf-8')
-    except UnicodeDecodeError:
-        stringio.seek(0)
-        df = pd.read_csv(stringio, encoding='utf-8-sig')
-    
-    # Clean and normalize
-    cleaned_df = parser.clean_and_normalize(df)
+    else:
+        raise ValueError("Unsupported file type. Please upload a PDF or CSV file.")
     
     return cleaned_df
 
@@ -364,18 +382,18 @@ def display_instructions():
     
     with col1:
         st.markdown("""
-        **Step 1: Export Your Bank Statement**
+        **Step 1: Download Your Bank Statement**
         1. Log into your online banking
         2. Go to your account statements
-        3. Export/Download as CSV format
+        3. Download as PDF (most common) or CSV
         4. Save the file to your computer
         """)
     
     with col2:
         st.markdown("""
         **Step 2: Upload & Analyze**
-        1. Click "Choose a CSV file" above
-        2. Select your bank statement CSV
+        1. Click "Choose a PDF or CSV file" above
+        2. Select your bank statement file
         3. Wait for the analysis to complete
         4. Discover where your money went
         """)
