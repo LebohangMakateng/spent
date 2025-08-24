@@ -380,9 +380,6 @@ def display_instructions():
         4. Discover where your money went
         """)
     
-    st.markdown("### Supported Banks")
-    st.info("Spent works with CSV exports from most South African banks including FNB, ABSA, Standard Bank, Nedbank, and Capitec. The app automatically detects and normalizes different CSV formats.")
-    
     # Sample data demo
     if st.button("Try with Sample Data"):
         try:
